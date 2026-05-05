@@ -1,0 +1,24 @@
+# Git
+.git
+.gitignore
+
+# Node
+*/node_modules
+*/dist
+*/.cache
+
+# Python
+*/__pycache__
+*/*.pyc
+*/venv
+*/.venv
+
+# Old files
+deploy.sh
+portfolio-backend.service
+nginx-portfolio.conf
+*.zip
+
+# Env overrides (docker-compose injects them)
+*/.env.production
+*/.env.local
