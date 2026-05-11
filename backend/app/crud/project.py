@@ -39,6 +39,8 @@ async def update_project(db: AsyncSession, project_id: int, data: ProjectUpdate)
     if not project:
         return None
     update_data = data.model_dump(exclude_unset=True)
+    update_data.pop("images", None)
+    update_data.pop("primary_image", None)
     if "technologies" in update_data and update_data["technologies"] is not None:
         update_data["technologies"] = json.dumps(update_data["technologies"])
     for key, value in update_data.items():

@@ -24,6 +24,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/khudayberdiyev_admin': {
+        target: 'http://localhost:5174',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 })

@@ -114,9 +114,13 @@ def delete_upload(relative_path: str) -> bool:
     try:
         cleaned = relative_path.lstrip("/")
         if cleaned.startswith("media/"):
-            cleaned = cleaned[len("media/") :]
-        full_path = Path(settings.UPLOAD_DIR) / cleaned
-        if full_path.exists():
+            cleaned = cleaned[len("media/"):]
+        upload_root = Path(settings.UPLOAD_DIR).resolve()
+        full_path = (upload_root / cleaned).resolve()
+        # Prevent path traversal: ensure path stays within upload directory
+        if not str(full_path).startswith(str(upload_root)):
+            return False
+        if full_path.exists() and full_path.is_file():
             full_path.unlink()
             return True
     except Exception:

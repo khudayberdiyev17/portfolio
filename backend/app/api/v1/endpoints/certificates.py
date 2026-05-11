@@ -21,6 +21,7 @@ async def public_get_certificates(db: AsyncSession = Depends(get_db)):
             "skills": json.loads(c.skills) if c.skills else [],
             "verified": c.verified,
             "verify_url": c.verify_url or "",
+            "issued_date": c.issued_date or "",
         }
         for c in certs
     ]

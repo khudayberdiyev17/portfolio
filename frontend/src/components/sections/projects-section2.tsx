@@ -5,7 +5,8 @@ import {
   Listbox, ListboxButton, ListboxOption, ListboxOptions,
 } from "@headlessui/react"
 import { ExternalLink, Github, ChevronDown, X, ChevronLeft, ChevronRight, Code2, Layers } from "lucide-react"
-import { api, normalizeMediaUrl } from "@/lib/api"
+import { normalizeMediaUrl } from "@/lib/api"
+import { bootstrapPortfolioData, getPrefetchedData } from "@/lib/preload"
 
 type ProjectResponse = {
   id:number; title:string; description:string; long_description:string
@@ -169,28 +170,34 @@ export function ProjectsSection() {
   const [error,     setError]     = useState<string|null>(null)
 
   useEffect(() => {
-    const ctrl = new AbortController()
-    api.get<ProjectResponse[]>("/projects/", { signal:ctrl.signal })
-      .then(res => {
-        const mapped: Project[] = (res.data||[]).map(p => {
+    bootstrapPortfolioData()
+      .then(() => {
+        const data = getPrefetchedData()
+        const rawProjects = (data.projects || []) as ProjectResponse[]
+        const mapped: Project[] = rawProjects.map((p) => {
           const techs = Array.isArray(p.technologies)
             ? p.technologies
-            : (p.technologies as unknown as string)?.split(",").map(s=>s.trim()).filter(Boolean)||[]
+            : (p.technologies as unknown as string)?.split(",").map((s) => s.trim()).filter(Boolean) || []
+          const normalizedPrimary = normalizeMediaUrl(p.demo_gif) || ""
+          const normalizedImages = p.images?.map((img) => normalizeMediaUrl(img.image) || img.image).filter(Boolean) || []
           return {
-            id:p.id, title:p.title, description:p.description,
-            longDesc:p.long_description||"", technologies:techs,
-            category:p.category||"other",
-            demoGif:normalizeMediaUrl(p.demo_gif)||"",
-            screenshots:p.images?.map(i=>normalizeMediaUrl(i.image)||i.image).filter(Boolean)||[],
-            liveUrl:p.live_url||"", githubUrl:p.github_url||undefined,
-            featured:p.featured,
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            longDesc: p.long_description || "",
+            technologies: techs,
+            category: p.category || "other",
+            demoGif: normalizedPrimary,
+            screenshots: normalizedImages,
+            liveUrl: p.live_url || "",
+            githubUrl: p.github_url || undefined,
+            featured: p.featured,
           }
         })
         setProjects(mapped)
       })
-      .catch(err => { if(err.name!=="CanceledError"&&err.name!=="AbortError") setError("Loyihalar yuklanmadi") })
-      .finally(()=>setLoading(false))
-    return ()=>ctrl.abort()
+      .catch(() => setError("Loyihalar yuklanmadi"))
+      .finally(() => setLoading(false))
   },[])
 
   const cats = ["all", ...Array.from(new Set(projects.map(p=>p.category)))]

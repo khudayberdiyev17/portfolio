@@ -61,6 +61,8 @@ async def admin_delete(
 ):
     if not admin["is_superuser"]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    if admin["id"] == admin_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot delete your own account")
     ok = await delete_admin(db, admin_id)
     if not ok:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Admin not found")

@@ -1,0 +1,17 @@
+{
+  "name": "portfolio-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n \"frontend,admin\" -c \"cyan,magenta\" \"npm run dev --prefix frontend\" \"npm run dev --prefix admin-panel\"",
+    "build:frontend": "npm run build --prefix frontend",
+    "build:admin": "npm run build --prefix admin-panel",
+    "build": "npm run build:frontend && npm run build:admin",
+    "install:all": "npm install --prefix frontend && npm install --prefix admin-panel",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

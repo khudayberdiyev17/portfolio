@@ -5,6 +5,40 @@ import { ExperienceSection }   from "@/components/sections/experience-section"
 import { ProjectsSection }     from "@/components/sections/projects-section2"
 import { CertificatesSection } from "@/components/sections/certificates-section"
 import { ContactSection }      from "@/components/sections/contact-section"
+import { bootstrapPortfolioData } from "@/lib/preload"
+
+function BootLoader({ simple }: { simple: boolean }) {
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: "var(--bg-void)" }}>
+      <div className="absolute inset-0 opacity-40">
+        <MatrixRain />
+      </div>
+      <div
+        className="relative rounded-2xl px-8 py-6 text-center min-w-[280px]"
+        style={{ background: "rgba(4,12,7,.9)", border: "1px solid rgba(0,255,65,.25)", boxShadow: "0 0 30px rgba(0,255,65,.18)" }}
+      >
+        <div className="font-terminal text-[10px] mb-2" style={{ color: "var(--text-muted)" }}>
+          {simple ? "// reload sequence" : "// boot sequence"}
+        </div>
+        <div className="font-[Syne] text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+          INITIALIZING SYSTEM
+        </div>
+        <div className="mt-4 h-1.5 w-full rounded-full overflow-hidden" style={{ background: "rgba(0,255,65,.15)" }}>
+          <motion.div
+            className="h-full"
+            style={{ background: "linear-gradient(90deg, #00ff41, #00d4ff)" }}
+            initial={{ x: "-100%" }}
+            animate={{ x: "100%" }}
+            transition={{ repeat: Infinity, duration: simple ? 0.8 : 1.3, ease: "linear" }}
+          />
+        </div>
+        <div className="mt-3 font-terminal text-xs" style={{ color: "var(--neon-green)" }}>
+          loading modules...
+        </div>
+      </div>
+    </div>
+  )
+}
 
 /* ─── Matrix Rain ──────────────────────────────────── */
 function MatrixRain() {
@@ -231,8 +265,23 @@ function MacWindow({ title, children }: { title: string; children: React.ReactNo
 export default function App() {
   const [section, setSection] = useState("about")
   const [ready, setReady]     = useState(false)
+  const [booting, setBooting] = useState(true)
+  const [reloadBoot, setReloadBoot] = useState(false)
 
-  useEffect(()=>{ setTimeout(()=>setReady(true), 100) }, [])
+  useEffect(() => {
+    const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined
+    const isReload = navEntry?.type === "reload"
+    setReloadBoot(isReload)
+    const minDelay = isReload ? 1000 : 2000
+
+    Promise.all([
+      bootstrapPortfolioData(),
+      new Promise((resolve) => setTimeout(resolve, minDelay)),
+    ]).finally(() => {
+      setBooting(false)
+      setReady(true)
+    })
+  }, [])
 
   const titles: Record<string, string> = {
     about:        "~/portfolio/about-me.sh",
@@ -253,6 +302,10 @@ export default function App() {
       case "contact":      return <ContactSection />
       default:             return <AboutSection />
     }
+  }
+
+  if (booting) {
+    return <BootLoader simple={reloadBoot} />
   }
 
   return (

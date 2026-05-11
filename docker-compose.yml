@@ -2,8 +2,6 @@
 #  Portfolio — docker compose up -d
 #  CTFd bilan birgalikda ishlaydi (8080 port)
 # ══════════════════════════════════════════════════════════════
-version: "3.9"
-
 services:
 
   # ── FastAPI Backend ────────────────────────────────────────
@@ -21,7 +19,7 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
       REFRESH_TOKEN_EXPIRE_DAYS: ${REFRESH_TOKEN_EXPIRE_DAYS:-7}
       # CORS: nginx'dan kelayotgan so'rovlarga ruxsat
-      CORS_ORIGINS: "http://localhost,http://localhost:8080,http://80.225.243.175,http://80.225.243.175:8080"
+      CORS_ORIGINS: "http://localhost,http://localhost:4000,http://localhost:5174,http://80.225.243.175,http://80.225.243.175:4000"
       UPLOAD_DIR: app/static/media
       MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-5}
     volumes:
@@ -29,9 +27,8 @@ services:
       - portfolio_data:/data
     networks:
       - portfolio_net
-    # Backend tashqariga chiqmaydi — faqat nginx orqali
-    expose:
-      - "8000"
+    ports:
+      - "8000:8000"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8000/health || exit 1"]
       interval: 30s
@@ -50,7 +47,7 @@ services:
     container_name: portfolio-web
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-8080}:80"
+      - "${APP_PORT:-4000}:80"
     depends_on:
       backend:
         condition: service_healthy

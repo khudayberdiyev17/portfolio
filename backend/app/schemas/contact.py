@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class ContactMessageCreate(BaseModel):
-    name: str = Field(..., max_length=255)
+    name: str = Field(..., min_length=1, max_length=255)
     email: EmailStr
     subject: str | None = Field(None, max_length=500)
     message: str = Field(..., min_length=10, max_length=5000)
